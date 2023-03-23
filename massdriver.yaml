@@ -1,0 +1,147 @@
+# This file will be used to generate all of the schema-*.json files in a bundle
+schema: draft-07
+name: "aws-kinesis-stream"
+description: "Amazon Kinesis is a fully-managed real-time data streaming and processing service offered by Amazon Web Services."
+source_url: github.com/massdriver-cloud/aws-kinesis-stream
+access: "private"
+type: "infrastructure"
+
+params:
+  # Examples will show up as configuration presets in the UI _and_
+  # they will be used to test configurations of the bundle.
+  examples:
+    - __name: Development
+      capacity:
+        stream_mode: "PROVISIONED"
+        shard_count: 4
+    - __name: Production
+      capacity:
+        stream_mode: "PROVISIONED"
+        shard_count: 16
+    - __name: Managed Capacity
+      capacity:
+        stream_mode: "ON_DEMAND"
+
+  required:
+    - stream
+    - observability
+    - capacity
+
+  properties:
+    stream:
+      title: Stream Configuration
+      Description: "General configuration for AWS Kinesis"
+      required:
+        - region
+      type: object
+      properties:
+        region:
+          title: Region
+          type: string
+          $md.immutable: true
+        retention_hours:
+          title: Retention
+          description: "The number of hours in which to keep data in a Kinesis stream"
+          type: integer
+          maximum: 8760
+          minimum: 24
+          default: 24
+    capacity:
+      type: object
+      title: Stream Capacity
+      description: "Capacity settings for managed or manualy sharding"
+      dependencies:
+        stream_mode:
+          oneOf:
+          - properties:
+              stream_mode:
+                const: PROVISIONED
+              shard_count:
+                title: Shard Count
+                description: "Each shard can support up to 5 transactions per second for reads, up to a maximum total data read rate of 2 MB per second and up to 1,000 records per second for writes, up to a maximum total data write rate of 1 MB per second (including partition keys)"
+                type: integer
+                minimum: 1
+                maximum: 4096
+                $md.immutable: true
+            required:
+              - stream_mode
+              - shard_count
+          - properties:
+              stream_mode:
+                const: ON_DEMAND
+      properties:
+        stream_mode:
+          title: Stream Mode
+          type: string
+          enum:
+            - ON_DEMAND
+            - PROVISIONED
+          $md.immutable: true
+    observability:
+      type: object
+      title: Observability
+      dependencies:
+        enable_shard_level_metrics:
+          oneOf:
+            - properties:
+                enable_shard_level_metrics:
+                  const: true
+                shard_level_metrics:
+                  title: "Shard Level Metrics"
+                  description: "In advanced usecases shard level metrics allow you to observe individual shards in your stream to programmatically optimize sharding strategy. Best practice indicates that you should be restrictive in the metrics you expose."
+                  type: array
+                  items:
+                    type: string
+                    enum:
+                      - IncomingBytes
+                      - IncomingRecords
+                      - IteratorAgeMilliseconds
+                      - OutgoingBytes
+                      - OutgoingRecords
+                      - ReadProvisionedThroughputExceeded
+                      - WriteProvisionedThroughputExceeded
+                  uniqueItems: true
+            - properties:
+                enable_shard_level_metrics:
+                  const: false
+      properties:
+        enable_shard_level_metrics:
+          title: Enable Shard Level Metrics?
+          description: Shard level metrics give insight in to per partition metrics. Only use these in advanced usecases of kinesis.
+          type: boolean
+          default: false
+
+# schema-connections.json
+# Named list of input connections (artifacts) (map[name]artifact)
+connections:
+  required :
+    - aws_authentication
+  properties:
+    aws_authentication:
+      $ref: massdriver/aws-iam-role
+
+
+# schema-artifacts.json
+# Named list of output artifacts  (map[name]artifact)
+artifacts:
+   required:
+     - stream
+   properties:
+     stream:
+       $ref: massdriver/aws-kinesis-stream
+
+# schema-ui.json
+# List of form customizations for params-schema
+# learn more about widgets & fields: https://docs.massdriver.cloud/bundles/custom-widgets-and-fields
+ui:
+  ui:order:
+    - stream
+    - capacity
+    - observability
+  stream:
+    region:
+      ui:field: supportedCloudLocationsDropdown
+      cloudService: aws
+    retention_hours:
+      ui:field: conversionFieldTime
+      unit: Hours

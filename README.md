@@ -158,7 +158,7 @@ Resources created by this bundle that can be connected to other bundles.
 
     - **`security`** *(object)*: Informs downstream services of network and/or IAM policies. Cannot contain additional properties.
       - **`iam`** *(object)*: IAM Policies. Cannot contain additional properties.
-        - **`^[a-z-/]+$`** *(object)*
+        - **`^[a-z]+[a-z_]*[a-z]+$`** *(object)*
           - **`policy_arn`** *(string)*: AWS IAM policy ARN.
 
             Examples:

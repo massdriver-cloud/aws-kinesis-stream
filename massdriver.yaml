@@ -3,7 +3,6 @@ name: aws-kinesis-stream
 version: 1.0.0
 description: Amazon Kinesis is a fully-managed real-time data streaming and processing service offered by Amazon Web Services.
 source_url: https://github.com/massdriver-cloud/aws-kinesis-stream
-type: application
 params:
   examples:
   - __name: Development

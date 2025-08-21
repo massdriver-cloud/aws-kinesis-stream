@@ -1,7 +1,6 @@
 resource "massdriver_artifact" "stream" {
-  field                = "stream"
-  provider_resource_id = module.kinesis_stream.stream_arn
-  name                 = "Kinesis Steram: ${local.name}"
+  field    = "stream"
+  name     = "Kinesis Steram: ${local.name}"
   artifact = jsonencode(
     {
       data = {

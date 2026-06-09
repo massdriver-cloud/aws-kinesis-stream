@@ -108,13 +108,13 @@ connections:
   - aws_authentication
   properties:
     aws_authentication:
-      "$ref": massdriver/aws-iam-role
+      "$ref": aws-iam-role
 artifacts:
   required:
   - stream
   properties:
     stream:
-      "$ref": massdriver/aws-kinesis-stream
+      "$ref": aws-kinesis-stream
 ui:
   ui:order:
   - stream
